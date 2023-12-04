@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DBAdapter } from "../db/adapter";
+import { DBAdapter, dbAdapter } from "../db/adapter";
 
 export const UserFieldsSchema = z.object({
   email: z.string(),
@@ -8,6 +8,18 @@ export const UserFieldsSchema = z.object({
 
 export type UserFields = z.infer<typeof UserFieldsSchema>;
 
-export class UserConfig {
-  constructor(public readonly dbAdapter: DBAdapter) {}
+export type UserConfig = {
+  fieldsSchema: typeof UserFieldsSchema;
+  dbAdapter: DBAdapter;
+};
+
+export function userConfig({
+  db,
+}: {
+  db: { name: string; adapter: ReturnType<typeof dbAdapter> };
+}): UserConfig {
+  return {
+    fieldsSchema: UserFieldsSchema,
+    dbAdapter: db.adapter({ name: db.name, fieldsSchema: UserFieldsSchema }),
+  };
 }

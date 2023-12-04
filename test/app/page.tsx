@@ -1,3 +1,3 @@
-export default function Home() {
-  return <h1 className="m-auto text-xl">Home</h1>;
+export default async function Page() {
+  return <h1>cms</h1>;
 }

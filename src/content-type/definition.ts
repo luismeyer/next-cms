@@ -1,25 +1,33 @@
-import { z } from "zod";
+import { ZodRawShape, z } from "zod";
 
-import { DBAdapter } from "../db/adapter";
+import { DBAdapter, dbAdapter } from "../db/adapter";
 
-export type ContentTypeConfig = {
+export type ContentType = {
   name: string;
-  fieldsSchema: z.ZodType;
+  fieldsSchema: z.ZodObject<ZodRawShape>;
   dbAdapter: DBAdapter;
 };
 
-export const createContentType = (
-  name: string,
-  fieldsSchema: z.ZodType,
-  dbAdapter: DBAdapter
-): ContentType => {
-  return new ContentType(name, fieldsSchema, dbAdapter);
-};
+export const contentType = ({
+  db,
+  fieldsSchema,
+  name,
+}: {
+  name: string;
+  fieldsSchema: z.ZodObject<ZodRawShape>;
+  db: { name: string; adapter: ReturnType<typeof dbAdapter> };
+}): ContentType => {
+  const FieldsBase = z.object({
+    name: z
+      .string()
+      .min(1)
+      .max(255)
+      .describe("Name of the entity. Required for every content-type."),
+  });
 
-export class ContentType {
-  constructor(
-    public readonly name: string,
-    public readonly fieldsSchema: z.ZodType,
-    public readonly dbAdapter: DBAdapter
-  ) {}
-}
+  return {
+    name,
+    fieldsSchema: FieldsBase.merge(fieldsSchema),
+    dbAdapter: db.adapter({ name: db.name, fieldsSchema }),
+  };
+};

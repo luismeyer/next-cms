@@ -1,53 +1,55 @@
-import "next-cms/dist/index.css";
+import "next-cms/dist/global.css";
 
-import { Config, TmpDBAdapter, UserConfig, createContentType } from "next-cms";
+import { n } from "next-cms";
 import { z } from "zod";
 
 /**
- * User config
+ * Restaurant Content Type
  */
-
-const userAdapter = new TmpDBAdapter("user");
-const userConfig = new UserConfig(userAdapter);
+const restaurantContentType = n.contentType({
+  name: "restaurant",
+  fieldsSchema: z.object({
+    rating: z.number().min(1).max(5).describe("Rating from 1 to 5"),
+    description: z.string().min(10).describe("Description of the restaurant"),
+    dogFriendly: z.boolean().optional(),
+  }),
+  db: {
+    name: "restaurant-db",
+    adapter: n.testAdapter,
+  },
+});
 
 /**
  * Restaurant Content Type
  */
-
-const restaurantAdapter = new TmpDBAdapter("restaurant");
-
-const restaurantSchema = z.object({
-  rating: z.number(),
-  description: z.string(),
+const playgroundContentType = n.contentType({
+  name: "playground",
+  fieldsSchema: z.object({
+    state: z.union([z.literal("dirty"), z.literal("clean")]),
+    description: z.string(),
+  }),
+  db: {
+    name: "playground-db",
+    adapter: n.testAdapter,
+  },
 });
-
-const restaurantContentType = createContentType(
-  "restaurant",
-  restaurantSchema,
-  restaurantAdapter
-);
-
-/**
- * Restaurant Content Type
- */
-
-const playgroundAdapter = new TmpDBAdapter("playground");
-
-const playgroundSchema = z.object({
-  state: z.union([z.literal("dirty"), z.literal("clean")]),
-  description: z.string(),
-});
-
-const playgroundContentType = createContentType(
-  "playground",
-  playgroundSchema,
-  playgroundAdapter
-);
 
 /**
  * Config
  */
-
-export const config = new Config("my-cms", userConfig);
-config.registerContentType(restaurantContentType);
-config.registerContentType(playgroundContentType);
+export const config = n.config({
+  name: "my-cms",
+  link: {
+    // base path for api routes
+    api: "api",
+    // base path for cms client routes
+    cms: "cms",
+  },
+  user: n.userConfig({
+    db: {
+      name: "user",
+      adapter: n.testAdapter,
+    },
+  }),
+  contentTypes: [restaurantContentType, playgroundContentType],
+});

@@ -5,6 +5,7 @@
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
+    "strictNullChecks": true,
     "outDir": "dist",
     "declaration": true,
     "esModuleInterop": true,
@@ -17,8 +18,9 @@
     "plugins": [{ "name": "next" }],
     "inlineSourceMap": true,
     "sourceRoot": "src",
-    "tsBuildInfoFile": ".tsbuildinfo"
+    "tsBuildInfoFile": ".tsbuildinfo",
+    "noUncheckedIndexedAccess": true
   },
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "test", "dist"]
 }
