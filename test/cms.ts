@@ -11,7 +11,10 @@ const restaurantContentType = n.contentType({
   fieldsSchema: z.object({
     rating: z.number().min(1).max(5).describe("Rating from 1 to 5"),
     description: z.string().min(10).describe("Description of the restaurant"),
-    dogFriendly: z.boolean().optional(),
+    dogFriendly: z.boolean().default(false).optional(),
+    veganMenu: z.boolean().default(false).optional(),
+    payByCard: z.boolean().default(true).describe("Can you pay by card?"),
+    email: z.string().optional().describe("Email contact of the restaurant"),
   }),
   db: {
     name: "restaurant-db",

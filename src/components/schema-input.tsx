@@ -1,9 +1,11 @@
 "use client";
 
+import { ChangeEvent, HTMLInputTypeAttribute } from "react";
 import { ControllerRenderProps, FieldValues } from "react-hook-form";
 import { JsonSchema7Type } from "zod-to-json-schema";
+
+import { getSchemaType } from "../json-schema";
 import { Input } from "./ui/input";
-import { ChangeEvent, HTMLInputTypeAttribute } from "react";
 
 type SchemaInputProps = {
   schema: JsonSchema7Type;
@@ -11,12 +13,12 @@ type SchemaInputProps = {
 };
 
 export function SchemaInput({ field, schema }: SchemaInputProps) {
-  const type = "type" in schema ? schema.type : "unknown";
+  const type = getSchemaType(schema);
 
   return (
     <Input
       {...field}
-      value={field.value ?? ""}
+      value={field.value}
       type={typeFromSchema(type)}
       placeholder={schema.description ?? "type value..."}
       onChange={(e) => {
@@ -38,11 +40,12 @@ function onChangeOverride(
 
       if (isNaN(parsed)) {
         event.target.value = "";
+        return "";
       } else {
         event.target.value = parsed.toString();
+        return parsed;
       }
 
-      return parsed;
     default:
       return event;
   }

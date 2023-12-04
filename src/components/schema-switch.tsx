@@ -15,7 +15,7 @@ export function SchemaSwitch({ field, schema }: SchemaInputProps) {
     <Switch
       checked={field.value}
       onCheckedChange={field.onChange}
-      defaultChecked={schema.default}
+      defaultChecked={field.value}
     />
   );
 }

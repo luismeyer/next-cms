@@ -1,5 +1,5 @@
 import { ContentType } from "./content-type/definition";
-import { UserConfig } from "./user/index";
+import { UserConfig } from "./user";
 
 export function config(options: {
   name: string;

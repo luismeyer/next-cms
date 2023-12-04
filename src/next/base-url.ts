@@ -3,7 +3,7 @@ export function createLink(...pathSegments: string[]) {
 
   if (typeof window !== "undefined") {
     // browser should use relative path
-    return `${path}`;
+    return "/" + path;
   }
 
   if (process.env.VERCEL_URL) {

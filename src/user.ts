@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { DBAdapter, dbAdapter } from "../db/adapter";
+import { DBAdapter, dbAdapter } from "./db/adapter";
 
 export const UserFieldsSchema = z.object({
   email: z.string(),

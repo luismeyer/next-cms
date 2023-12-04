@@ -18,6 +18,10 @@ export const contentType = ({
   db: { name: string; adapter: ReturnType<typeof dbAdapter> };
 }): ContentType => {
   const FieldsBase = z.object({
+    status: z
+      .enum(["draft", "published", "archived"])
+      .default("draft")
+      .describe("Name of the entity. Required for every content-type."),
     name: z
       .string()
       .min(1)
