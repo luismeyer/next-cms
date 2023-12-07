@@ -4,7 +4,7 @@ import { JsonSchema7ObjectType } from "zod-to-json-schema";
 
 import { SchemaForm } from "../../components/schema-form";
 import { createLink } from "../../next/base-url";
-import { Entity } from "../../db";
+import { Entity } from "../../db/adapter";
 
 type FormProps = {
   fields: JsonSchema7ObjectType;

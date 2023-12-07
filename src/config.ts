@@ -1,11 +1,11 @@
 import { ContentType } from "./content-type/definition";
-import { UserConfig } from "./user";
+import { tokenConfig } from "./token";
 
 export function config(options: {
   name: string;
-  user: UserConfig;
+  token: ReturnType<typeof tokenConfig>;
   contentTypes?: ContentType[];
-  link: { api: string; cms: string };
+  link: { api: string; cms: string; login: string };
 }) {
   const _contentTypes = new Map<string, ContentType>();
 
@@ -15,7 +15,7 @@ export function config(options: {
 
   return {
     name: options.name,
-    user: options.user,
+    token: options.token,
     link: options.link,
     registerContentType(contentType: ContentType) {
       _contentTypes.set(contentType.name, contentType);

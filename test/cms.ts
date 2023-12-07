@@ -1,3 +1,5 @@
+"server only";
+
 import "next-cms/dist/global.css";
 
 import { n } from "next-cms";
@@ -38,21 +40,36 @@ const playgroundContentType = n.contentType({
 });
 
 /**
+ * Token config
+ */
+
+function hash(value: string) {
+  const salt = process.env.SALT;
+  return `${salt}+${value}+${salt}`;
+}
+
+const token = n.tokenConfig({
+  hash,
+  tokens: [
+    {
+      hashedValue: process.env.HASHED_READONLY_TOKEN!,
+      expiresAt: new Date("2024-01-01"),
+      read: [restaurantContentType],
+      write: [playgroundContentType],
+    },
+  ],
+});
+
+/**
  * Config
  */
 export const config = n.config({
   name: "my-cms",
   link: {
-    // base path for api routes
-    api: "api",
-    // base path for cms client routes
+    api: "api/cms",
     cms: "cms",
+    login: "api/auth/signin",
   },
-  user: n.userConfig({
-    db: {
-      name: "user",
-      adapter: n.testAdapter,
-    },
-  }),
+  token,
   contentTypes: [restaurantContentType, playgroundContentType],
 });

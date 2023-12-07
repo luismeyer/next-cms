@@ -1,5 +1,6 @@
 import Link from "next/link";
 import zodToJsonSchema, { JsonSchema7ObjectType } from "zod-to-json-schema";
+import { getServerSession } from "next-auth";
 
 import { config } from "../../config";
 import { createLink } from "../../next/base-url";
@@ -7,6 +8,7 @@ import { parseDynamicParams } from "../../next/dynamic-params";
 import { CreateForm } from "./create-form";
 import { ListPage, NEW_ITEM_SLUG } from "./list-page";
 import { UpdateForm } from "./update-form";
+import { redirect } from "next/navigation";
 
 export function contentTypePage({
   contentTypeNames,
@@ -15,6 +17,12 @@ export function contentTypePage({
   link,
 }: ReturnType<typeof config>) {
   return async function ContentTypePage(params: unknown) {
+    const session = await getServerSession();
+
+    if (!session?.user) {
+      redirect(link.login);
+    }
+
     const [contentTypeName, idOrAction] = parseDynamicParams(params) ?? [];
 
     const contentType = contentTypeName && contentTypes.get(contentTypeName);
