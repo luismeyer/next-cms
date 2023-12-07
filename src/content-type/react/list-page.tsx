@@ -1,17 +1,18 @@
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 import { Button } from "../../components/ui/button";
 import { createLink } from "../../next/base-url";
 import { ContentType } from "../definition";
 import { columns, RowDef } from "./list-columns";
-import { DataTable } from "./list-table";
+import { ListTable } from "./list-table";
 
 type ListProps = {
   contentType: ContentType;
   link: { cms: string; api: string };
 };
+
+export const NEW_ITEM_SLUG = "create";
 
 export async function ListPage({ contentType, link }: ListProps) {
   const { name, dbAdapter } = contentType;
@@ -31,14 +32,19 @@ export async function ListPage({ contentType, link }: ListProps) {
         <h1 className="text-2xl">{name}</h1>
 
         <Button asChild>
-          <Link href={createLink(link.cms, name, "new")}>create</Link>
+          <Link href={createLink(link.cms, name, NEW_ITEM_SLUG)}>create</Link>
         </Button>
       </div>
 
       <hr />
 
       <div className="p-4">
-        <DataTable columns={columns} data={rows} link={link} name={name} />
+        <ListTable
+          columns={columns}
+          data={rows}
+          link={link}
+          contentTypeName={name}
+        />
       </div>
     </div>
   );

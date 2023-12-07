@@ -1,6 +1,6 @@
 import { ZodObject, ZodRawShape, TypeOf } from "zod";
 
-export type Fields = Record<string, number | string | boolean>;
+export type Fields = Record<string, number | string | boolean | unknown>;
 
 export interface Entity<F extends Fields = Fields> {
   id: string;

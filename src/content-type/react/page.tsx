@@ -1,10 +1,12 @@
 import Link from "next/link";
+import zodToJsonSchema, { JsonSchema7ObjectType } from "zod-to-json-schema";
 
 import { config } from "../../config";
 import { createLink } from "../../next/base-url";
 import { parseDynamicParams } from "../../next/dynamic-params";
-import { ListPage } from "./list-page";
-import { CreatePage } from "./create-page";
+import { CreateForm } from "./create-form";
+import { ListPage, NEW_ITEM_SLUG } from "./list-page";
+import { UpdateForm } from "./update-form";
 
 export function contentTypePage({
   contentTypeNames,
@@ -13,16 +15,40 @@ export function contentTypePage({
   link,
 }: ReturnType<typeof config>) {
   return async function ContentTypePage(params: unknown) {
-    const [contentTypeName, action] = parseDynamicParams(params) ?? [];
+    const [contentTypeName, idOrAction] = parseDynamicParams(params) ?? [];
 
     const contentType = contentTypeName && contentTypes.get(contentTypeName);
 
     if (contentType) {
-      if (action) {
-        return <CreatePage contentType={contentType} link={link} />;
+      if (!idOrAction) {
+        return <ListPage contentType={contentType} link={link} />;
       }
 
-      return <ListPage contentType={contentType} link={link} />;
+      const schema = zodToJsonSchema(
+        contentType.fieldsSchema
+      ) as JsonSchema7ObjectType;
+
+      if (idOrAction === NEW_ITEM_SLUG) {
+        return (
+          <CreateForm
+            contentTypeName={contentType.name}
+            fields={schema}
+            link={link}
+          />
+        );
+      }
+
+      const entity = await contentType.dbAdapter.api.read(idOrAction);
+      if (entity) {
+        return (
+          <UpdateForm
+            contentTypeName={contentType.name}
+            fields={schema}
+            link={link}
+            entity={entity}
+          />
+        );
+      }
     }
 
     return (

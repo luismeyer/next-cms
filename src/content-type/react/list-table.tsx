@@ -2,93 +2,34 @@
 
 import { useRouter } from "next/navigation";
 
-import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-} from "@tanstack/react-table";
+import { ColumnDef, Row } from "@tanstack/react-table";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../../components/ui/table";
+import { DataTable } from "../../components/data-table";
 import { createLink } from "../../next/base-url";
+import { RowDef } from "./list-columns";
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
+interface DataTableProps {
+  columns: ColumnDef<RowDef>[];
+  data: RowDef[];
   link: { cms: string; api: string };
-  name: string;
+  contentTypeName: string;
 }
 
-export function DataTable<TData, TValue>({
+export function ListTable({
   columns,
   data,
   link,
-  name,
-}: DataTableProps<TData, TValue>) {
+  contentTypeName,
+}: DataTableProps) {
   const router = useRouter();
 
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-  });
+  function handleRowClick(row: Row<RowDef>) {
+    const url = createLink(link.cms, contentTypeName, row.original.id);
+
+    return () => router.push(url);
+  }
 
   return (
-    <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                return (
-                  <TableHead key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-
-        <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => (
-              <TableRow
-                className="cursor-pointer"
-                onClick={() => {
-                  router.push(createLink(link.cms, name, row.id));
-                }}
-                key={row.id}
-                data-state={row.getIsSelected() && "selected"}
-              >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
-              </TableCell>
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
-    </div>
+    <DataTable columns={columns} data={data} onRowClick={handleRowClick} />
   );
 }

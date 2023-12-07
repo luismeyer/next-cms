@@ -1,13 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { JsonSchema7ObjectType, JsonSchema7Type } from "zod-to-json-schema";
 
 import { ajvResolver } from "@hookform/resolvers/ajv";
 
 import { isBooleanSchema } from "../json-schema";
-import { createLink } from "../next/base-url";
 import { SchemaField } from "./schema-field";
 import { Button } from "./ui/button";
 import {
@@ -21,24 +19,21 @@ import {
 import { cn } from "./ui/utils";
 
 type FormProps = {
+  defaults?: Record<string, unknown>;
   fields: JsonSchema7ObjectType;
-  link: { cms: string; api: string };
-  name: string;
+  onSubmit: (data: unknown) => void;
 };
 
-export function SchemaForm({ fields, link, name }: FormProps) {
-  const router = useRouter();
-
-  const overviewPage = createLink(link.cms, name);
-  const apiEndpoint = createLink(link.api, name);
-
-  const defaultValues: Record<string, string> = {};
+export function SchemaForm({ fields, onSubmit, defaults }: FormProps) {
+  const defaultValues: Record<string, any> = defaults ?? {};
 
   const firstRow: { key: string; value: JsonSchema7Type }[] = [];
   const rows: { key: string; value: JsonSchema7Type }[] = [];
 
   Object.entries(fields.properties).forEach(([key, value]) => {
-    defaultValues[key] = value.default ?? "";
+    if (!defaultValues[key]) {
+      defaultValues[key] = value.default ?? "";
+    }
 
     if (isBooleanSchema(value)) {
       firstRow.push({ key, value });
@@ -52,24 +47,6 @@ export function SchemaForm({ fields, link, name }: FormProps) {
     shouldUseNativeValidation: false,
     defaultValues,
   });
-
-  async function handleSubmit(formData: unknown) {
-    const response = await fetch(apiEndpoint, {
-      body: JSON.stringify(formData),
-      method: "PUT",
-    });
-
-    console.log(response);
-
-    if (response.ok) {
-      router.push(overviewPage);
-      return;
-    }
-
-    form.setError("form", {
-      message: await response.text(),
-    });
-  }
 
   function renderRowItem(key: string, value: JsonSchema7Type) {
     const description = formDescription(value);
@@ -108,7 +85,7 @@ export function SchemaForm({ fields, link, name }: FormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit)} className="grid gap-8">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-8">
         <div className="grid gap-6">
           <div className="flex gap-12 flex-wrap">
             {firstRow.map(({ key, value }) => renderRowItem(key, value))}

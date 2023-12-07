@@ -4,6 +4,7 @@ import { z } from "zod";
 import { config } from "../../config";
 import { parseDynamicParams } from "../../next/dynamic-params";
 import { ContentType } from "..";
+import { revalidatePath } from "next/cache";
 
 function getContentType(contentTypes: Map<string, ContentType>, name?: string) {
   if (!name) {
@@ -13,7 +14,7 @@ function getContentType(contentTypes: Map<string, ContentType>, name?: string) {
   return contentTypes.get(name);
 }
 
-export function api({ contentTypes }: ReturnType<typeof config>) {
+export function api({ contentTypes, link }: ReturnType<typeof config>) {
   return {
     async PUT(request: NextRequest, params: unknown) {
       const [typeName] = parseDynamicParams(params) ?? [];
@@ -23,11 +24,15 @@ export function api({ contentTypes }: ReturnType<typeof config>) {
         return new Response("Not found", { status: 404 });
       }
 
+      // parse input
       const body = await request.json();
-
       const entity = contentType.fieldsSchema.parse(body);
 
+      // create
       const createdEntity = await contentType.dbAdapter.api.create(entity);
+
+      // revalidate cache
+      revalidatePath("/");
 
       return new Response(JSON.stringify(createdEntity), {
         headers: { "content-type": "application/json" },
@@ -42,11 +47,15 @@ export function api({ contentTypes }: ReturnType<typeof config>) {
         return new Response("Not found", { status: 404 });
       }
 
-      const { name, ...rest } = Object.fromEntries(await request.formData());
+      // parse input
+      const body = await request.json();
+      const entity = contentType.fieldsSchema.parse(body);
 
-      const entity = contentType.fieldsSchema.parse(rest);
-
+      // update
       const updatedEntity = await contentType.dbAdapter.api.update(id, entity);
+
+      // revalidate cache
+      revalidatePath("/");
 
       return new Response(JSON.stringify(updatedEntity), {
         headers: { "content-type": "application/json" },
